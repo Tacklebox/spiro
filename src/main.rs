@@ -12,7 +12,6 @@ use stdweb::web::event::{MouseDownEvent, MouseMoveEvent, MouseUpEvent, ResizeEve
 
 use stdweb::web::html_element::CanvasElement;
 
-// Shamelessly stolen from webplatform's TodoMVC example.
 macro_rules! enclose {
     ( ($( $x:ident ),*) $y:expr ) => {
         {
@@ -32,11 +31,11 @@ fn main() {
     stdweb::initialize();
 
     let drawing = Rc::new(Cell::new(false));
-    let drawing_md = drawing.clone();
-    let drawing_mu = drawing.clone();
 
-    let previous = Rc::new(Cell::new(Point { x: 0 as f64, y: 0 as f64 }));
-    let previous_md = previous.clone();
+    let previous = Rc::new(Cell::new(Point {
+        x: 0 as f64,
+        y: 0 as f64,
+    }));
 
     console!(log, "init");
 
@@ -51,20 +50,25 @@ fn main() {
     canvas.set_width(canvas.offset_width() as u32);
     canvas.set_height(canvas.offset_height() as u32);
 
-    let center = Point {
+    let center = Rc::new(Cell::new(Point {
         x: (canvas.offset_width() / 2) as f64,
         y: (canvas.offset_height() / 2) as f64,
-    };
-
-    window().add_event_listener(enclose!( (canvas) move |_: ResizeEvent| {
-        canvas.set_width(canvas.offset_width() as u32);
-        canvas.set_height(canvas.offset_height() as u32);
     }));
 
-    canvas.add_event_listener(enclose!( (context) move |event: MouseMoveEvent| {
-        //console!(log, "drawing: {}, x: {}, y: {}", drawing.get(),f64::from(event.client_x()), f64::from(event.client_y()));
+    window().add_event_listener(enclose!( (canvas, center) move |_: ResizeEvent| {
+        canvas.set_width(canvas.offset_width() as u32);
+        canvas.set_height(canvas.offset_height() as u32);
+		center.set(Point{
+			x: (canvas.offset_width() / 2) as f64,
+			y: (canvas.offset_height() / 2) as f64
+		});
+    }));
+
+    canvas.add_event_listener(
+        enclose!( (context, previous, center, drawing) move |event: MouseMoveEvent| {
         if drawing.get() {
-            let prev = previous.get().clone();
+            let prev = previous.get();
+			let center = center.get();
             let user_x = f64::from(event.client_x());
             let user_y = f64::from(event.client_y());
             context.move_to(prev.x, prev.y);
@@ -74,19 +78,22 @@ fn main() {
             context.stroke();
             previous.set(Point{x:user_x,y:user_y});
         }
-    }));
+    }),
+    );
 
-    canvas.add_event_listener(enclose!( (context) move |event: MouseDownEvent| {
-        drawing_md.set(true);
+    canvas.add_event_listener(
+        enclose!( (context, drawing, previous) move |event: MouseDownEvent| {
+        drawing.set(true);
         let user_x = f64::from(event.client_x());
         let user_y = f64::from(event.client_y());
-        previous_md.set(Point{x:user_x,y:user_y});
+        previous.set(Point{x:user_x,y:user_y});
         context.move_to(user_x, user_y);
-    }));
+    }),
+    );
 
-    canvas.add_event_listener(move |_event: MouseUpEvent| {
-        drawing_mu.set(false);
-    });
+    canvas.add_event_listener(enclose!( (drawing) move |_event: MouseUpEvent| {
+        drawing.set(false);
+    }));
 
     stdweb::event_loop();
 }
