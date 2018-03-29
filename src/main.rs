@@ -4,6 +4,8 @@ extern crate stdweb;
 use std::rc::Rc;
 use std::cell::Cell;
 
+use std::f64::consts::PI;
+
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
 use stdweb::web::{document, window, CanvasRenderingContext2d};
@@ -21,11 +23,8 @@ macro_rules! enclose {
     };
 }
 
-#[derive(Copy, Clone)]
-struct Point {
-    x: f64,
-    y: f64,
-}
+mod minivec;
+use minivec::{Point, magnitude, distance, angle};
 
 fn main() {
     stdweb::initialize();
@@ -69,14 +68,37 @@ fn main() {
         if drawing.get() {
             let prev = previous.get();
 			let center = center.get();
-            let user_x = f64::from(event.client_x());
-            let user_y = f64::from(event.client_y());
+            let current = Point{x:f64::from(event.client_x()),y:f64::from(event.client_y())};
             context.move_to(prev.x, prev.y);
-            context.line_to(user_x, user_y);
+            context.line_to(current.x, current.y);
+
+            let delta_prev = distance(prev, center);
+            let magnitude_prev = magnitude(delta_prev);
+            let theta_prev = angle(delta_prev);
+
+            let delta = distance(current, center);
+            //console!(log, "point relative to center: ({}, {})", delta.x, delta.y);
+            let magnitude = magnitude(delta);
+            //console!(log, "distance relative to center: {}", magnitude);
+            let theta = angle(delta);
+            console!(log, "x: ", delta.x, "y: ", delta.y, "theta: ", theta);
+
+            context.move_to(
+                center.x+(magnitude_prev*(theta_prev+PI).cos()),
+                center.y+(magnitude_prev*(theta_prev+PI).sin())
+            );
+            context.line_to(
+                center.x+magnitude*(theta+PI).cos(),
+                center.y+magnitude*(theta+PI).sin()
+            );
+
+            /* mirroring
             context.move_to(((prev.x-center.x)*-1 as f64)+center.x, prev.y);
-            context.line_to(((user_x-center.x)*-1 as f64)+center.x, user_y);
+            context.line_to(((current.x-center.x)*-1 as f64)+center.x, current.y);
+            */
+
             context.stroke();
-            previous.set(Point{x:user_x,y:user_y});
+            previous.set(Point{x:current.x,y:current.y});
         }
     }),
     );
@@ -84,10 +106,9 @@ fn main() {
     canvas.add_event_listener(
         enclose!( (context, drawing, previous) move |event: MouseDownEvent| {
         drawing.set(true);
-        let user_x = f64::from(event.client_x());
-        let user_y = f64::from(event.client_y());
-        previous.set(Point{x:user_x,y:user_y});
-        context.move_to(user_x, user_y);
+        let current = Point{x:f64::from(event.client_x()),y:f64::from(event.client_y())};
+        context.move_to(current.x, current.y);
+        previous.set(current);
     }),
     );
 
