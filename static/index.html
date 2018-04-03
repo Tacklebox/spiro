@@ -3,17 +3,17 @@
 	<head>
 		<meta charset="utf-8">
 		<title>stdweb • Canvas</title>
-		<style>
-			html, body, canvas {
-				margin: 0px;
-				padding: 0px;
-				width: 100%;
-				height: 100%;
-				overflow: hidden;
-			}
-		</style>
+		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
+		<menu>
+			<menuitem>
+				<div id="replication-num-label">1</div>
+			</menuitem>
+			<menuitem>
+				<input type="range" min="1" max="100" value="1" orient="vertical" id="replication-num"/>
+			</menuitem>
+		</menu>
 		<canvas id="canvas"></canvas>
 		<script src="spiro.js"></script>
 	</body>

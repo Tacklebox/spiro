@@ -1,0 +1,40 @@
+html, body, canvas {
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+}
+
+menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0px;
+  padding:10px;
+  flex: 0 0 30px;
+  background-color: rgba(0,0,0,0.1);
+}
+
+menu>menuitem:nth-child(2) {
+  flex: 1 0 300px;
+}
+
+canvas {
+  flex: 1 1 0;
+}
+
+#replication-num {
+  width: 20px;
+  height: 90%;
+  -webkit-appearance: slider-vertical;
+}
+
+#replication-num-label {
+  text-align: center;
+}
