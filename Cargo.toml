@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["Maxwell Borden <maxwellborden@gmail.com>"]
 
 [dependencies]
-stdweb = {path = "../stdweb"}
+stdweb = { git = "https://github.com/Tacklebox/stdweb", branch = "mouse_offsets" }
