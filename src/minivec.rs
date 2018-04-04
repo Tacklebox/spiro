@@ -17,12 +17,5 @@ pub fn distance(p1: Point, p2: Point) -> Point {
 }
 
 pub fn angle(p1: Point) -> f64 {
-    match p1 {
-        Point { x, y } if x.abs() < 1e-10 && y.abs() < 1e-10 => 0f64,
-        Point { x, .. } if x == 0f64 => p1.y.signum() * PI / 2f64,
-        Point { x, .. } if x > 0f64 => (p1.y / p1.x).atan(),
-        Point { y, .. } if y >= 0f64 => (p1.y / p1.x).atan() + PI,
-        Point { y, .. } if y < 0f64 => (p1.y / p1.x).atan() - PI,
-        _ => panic!("Error converting point to angle!"),
-    }
+    p1.y.atan2(p1.x)
 }
